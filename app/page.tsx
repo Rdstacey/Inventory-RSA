@@ -14,6 +14,7 @@ export default function Home() {
   // Load data on client side (for static export)
   const [allItems, setAllItems] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>({});
   const [compareItems, setCompareItems] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,13 +23,20 @@ export default function Home() {
   // Load data on mount
   useEffect(() => {
     fetch('/data/inventory.json')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Failed to load inventory: ${res.status} ${res.statusText}`);
+        }
+        return res.json();
+      })
       .then(data => {
         setAllItems(data.items || []);
         setIsLoading(false);
+        setError(null);
       })
       .catch(err => {
         console.error('Error loading inventory:', err);
+        setError(err.message || 'Failed to load inventory. Please refresh the page.');
         setIsLoading(false);
       });
   }, []);
@@ -73,6 +81,23 @@ export default function Home() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-600">Loading inventory...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 text-lg font-semibold mb-2">Error loading inventory</p>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-primary-blue text-white px-4 py-2 rounded hover:bg-primary-dark"
+          >
+            Reload Page
+          </button>
+        </div>
       </div>
     );
   }

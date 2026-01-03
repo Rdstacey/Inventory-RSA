@@ -10,8 +10,10 @@ interface InventoryCardProps {
 
 export default function InventoryCard({ item, onCompareToggle, isComparing = false }: InventoryCardProps) {
   const firstImage = item.images && item.images.length > 0 ? item.images[0] : null;
-  // Ensure proper path construction - Next.js Image will handle basePath and URL encoding
-  const imagePath = firstImage ? `/${firstImage}` : null;
+  // Detect basePath for GitHub Pages (same logic as in page.tsx)
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const basePath = pathname.startsWith('/Inventory-RSA') ? '/Inventory-RSA' : '';
+  const imagePath = firstImage ? `${basePath}/${firstImage}` : null;
 
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">

@@ -11,6 +11,10 @@ interface ImageGalleryProps {
 export default function ImageGallery({ images, title }: ImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Detect basePath for GitHub Pages
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const basePath = pathname.startsWith('/Inventory-RSA') ? '/Inventory-RSA' : '';
 
   if (!images || images.length === 0) {
     return (
@@ -26,7 +30,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
         {/* Main Image */}
         <div className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden">
           <Image
-            src={`/${images[selectedImage]}`}
+            src={`${basePath}/${images[selectedImage]}`}
             alt={`${title} - Image ${selectedImage + 1}`}
             fill
             className="object-contain cursor-pointer"
@@ -47,7 +51,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
                 }`}
               >
                 <Image
-                  src={`/${image}`}
+                  src={`${basePath}/${image}`}
                   alt={`${title} - Thumbnail ${index + 1}`}
                   fill
                   className="object-cover"
@@ -74,7 +78,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
             </button>
             <div className="relative w-full h-full">
               <Image
-                src={`/${images[selectedImage]}`}
+                src={`${basePath}/${images[selectedImage]}`}
                 alt={`${title} - Full size`}
                 width={1200}
                 height={800}

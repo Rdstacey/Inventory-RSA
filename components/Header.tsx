@@ -22,7 +22,7 @@ export default function Header() {
               {/* Logo - RS Automation logo with globe */}
               <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0">
                 <Image
-                  src="/logo.png"
+                  src="/LOGO.png"
                   alt="RS Automation Logo"
                   fill
                   className="object-contain"

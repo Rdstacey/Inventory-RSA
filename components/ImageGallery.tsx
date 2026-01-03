@@ -12,9 +12,12 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // Detect basePath for GitHub Pages
+  // Detect if we're on custom domain (no basePath) or GitHub Pages (with basePath)
+  const isCustomDomain = typeof window !== 'undefined' && 
+    (window.location.hostname === 'inventory.rsautomation.net' || 
+     window.location.hostname === 'www.rsautomation.net');
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-  const basePath = pathname.startsWith('/Inventory-RSA') ? '/Inventory-RSA' : '';
+  const basePath = isCustomDomain ? '' : (pathname.startsWith('/Inventory-RSA') ? '/Inventory-RSA' : '');
 
   if (!images || images.length === 0) {
     return (

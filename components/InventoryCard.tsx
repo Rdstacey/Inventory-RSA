@@ -10,9 +10,12 @@ interface InventoryCardProps {
 
 export default function InventoryCard({ item, onCompareToggle, isComparing = false }: InventoryCardProps) {
   const firstImage = item.images && item.images.length > 0 ? item.images[0] : null;
-  // Detect basePath for GitHub Pages (same logic as in page.tsx)
+  // Detect if we're on custom domain (no basePath) or GitHub Pages (with basePath)
+  const isCustomDomain = typeof window !== 'undefined' && 
+    (window.location.hostname === 'inventory.rsautomation.net' || 
+     window.location.hostname === 'www.rsautomation.net');
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-  const basePath = pathname.startsWith('/Inventory-RSA') ? '/Inventory-RSA' : '';
+  const basePath = isCustomDomain ? '' : (pathname.startsWith('/Inventory-RSA') ? '/Inventory-RSA' : '');
   const imagePath = firstImage ? `${basePath}/${firstImage}` : null;
 
   return (

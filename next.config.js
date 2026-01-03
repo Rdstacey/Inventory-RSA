@@ -5,8 +5,9 @@ const nextConfig = {
     unoptimized: true, // Required for static export
   },
   trailingSlash: true,
-  // Base path for GitHub Pages - matches repository name
-  basePath: '/Inventory-RSA',
+  // No basePath for custom domain (inventory.rsautomation.net)
+  // basePath will be detected dynamically in components for GitHub Pages fallback
+  // basePath: '',
 }
 
 module.exports = nextConfig

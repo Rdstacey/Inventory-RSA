@@ -22,13 +22,13 @@ export default function Home() {
 
   // Load data on mount
   useEffect(() => {
-    // Detect basePath from current location (for GitHub Pages subdirectory)
-    // If we're at /Inventory-RSA/, basePath is /Inventory-RSA
-    // If we're at /, basePath is empty
+    // Detect if we're on custom domain (no basePath) or GitHub Pages (with basePath)
+    const isCustomDomain = window.location.hostname === 'inventory.rsautomation.net' || 
+                          window.location.hostname === 'www.rsautomation.net';
     const pathname = window.location.pathname;
-    const basePath = pathname.startsWith('/Inventory-RSA') ? '/Inventory-RSA' : '';
+    const basePath = isCustomDomain ? '' : (pathname.startsWith('/Inventory-RSA') ? '/Inventory-RSA' : '');
     const dataPath = `${basePath}/data/inventory.json`;
-    console.log('Starting to fetch inventory data from', dataPath, '(detected basePath:', basePath, ')');
+    console.log('Starting to fetch inventory data from', dataPath, '(detected basePath:', basePath, ', hostname:', window.location.hostname, ')');
     
     let isCancelled = false;
     

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { FilterState } from '@/types/inventory';
 
 interface FilterSidebarProps {
@@ -15,6 +16,8 @@ export default function FilterSidebar({
   activeFilters,
   onFilterChange,
 }: FilterSidebarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
   const handleCategoryClick = (category: string) => {
     onFilterChange({
       ...activeFilters,
@@ -30,10 +33,25 @@ export default function FilterSidebar({
   };
 
   return (
-    <div className="w-full md:w-64 bg-white border-r border-gray-200 p-4">
-      <div className="bg-primary-blue text-white p-3 mb-4 rounded">
+    <div className="w-full md:w-64 bg-white border-r border-gray-200 md:border-b-0 border-b border-gray-200">
+      {/* Mobile Toggle Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full md:hidden bg-primary-blue text-white p-3 flex items-center justify-between font-semibold hover:bg-primary-dark transition-colors"
+      >
+        <span>EXPAND your search here:</span>
+        <span className={`transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+          ▼
+        </span>
+      </button>
+
+      {/* Desktop Header (always visible) */}
+      <div className="hidden md:block bg-primary-blue text-white p-3 mb-4">
         <h2 className="font-semibold">EXPAND your search here:</h2>
       </div>
+
+      {/* Filter Content - Collapsible on mobile, always visible on desktop */}
+      <div className={`${isOpen ? 'block' : 'hidden'} md:block p-4`}>
 
       {/* Category Filter */}
       <div className="mb-6">
@@ -91,6 +109,7 @@ export default function FilterSidebar({
               ))}
           </div>
         </details>
+      </div>
       </div>
     </div>
   );

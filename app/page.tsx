@@ -22,7 +22,13 @@ export default function Home() {
 
   // Load data on mount
   useEffect(() => {
-    console.log('Starting to fetch inventory data from /data/inventory.json...');
+    // Detect basePath from current location (for GitHub Pages subdirectory)
+    // If we're at /Inventory-RSA/, basePath is /Inventory-RSA
+    // If we're at /, basePath is empty
+    const pathname = window.location.pathname;
+    const basePath = pathname.startsWith('/Inventory-RSA') ? '/Inventory-RSA' : '';
+    const dataPath = `${basePath}/data/inventory.json`;
+    console.log('Starting to fetch inventory data from', dataPath, '(detected basePath:', basePath, ')');
     
     let isCancelled = false;
     
@@ -37,7 +43,7 @@ export default function Home() {
 
     const controller = new AbortController();
     
-    fetch('/data/inventory.json', {
+    fetch(dataPath, {
       signal: controller.signal,
       headers: {
         'Accept': 'application/json',

@@ -22,23 +22,75 @@ export default function Home() {
 
   // Load data on mount
   useEffect(() => {
-    fetch('/data/inventory.json')
+    console.log('Starting to fetch inventory data from /data/inventory.json...');
+    
+    let isCancelled = false;
+    
+    // Add timeout to prevent hanging
+    const timeoutId = setTimeout(() => {
+      if (!isCancelled) {
+        console.error('Fetch timeout - taking too long to load inventory');
+        setError('Request timed out. The inventory file may be too large or the server is slow. Please check the browser console for details.');
+        setIsLoading(false);
+      }
+    }, 30000); // 30 second timeout
+
+    const controller = new AbortController();
+    
+    fetch('/data/inventory.json', {
+      signal: controller.signal,
+      headers: {
+        'Accept': 'application/json',
+      },
+    })
       .then(res => {
+        console.log('Fetch response received:', res.status, res.statusText, res.headers.get('content-type'));
         if (!res.ok) {
-          throw new Error(`Failed to load inventory: ${res.status} ${res.statusText}`);
+          throw new Error(`Failed to load inventory: ${res.status} ${res.statusText}. Please check that the file exists at /data/inventory.json`);
         }
-        return res.json();
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.warn('Unexpected content type:', contentType);
+        }
+        return res.text().then(text => {
+          console.log('Response text length:', text.length);
+          try {
+            return JSON.parse(text);
+          } catch (parseErr) {
+            console.error('JSON parse error:', parseErr);
+            throw new Error('Failed to parse inventory data. The file may be corrupted.');
+          }
+        });
       })
       .then(data => {
+        if (isCancelled) return;
+        console.log('Inventory data loaded successfully:', data.items?.length || 0, 'items');
+        clearTimeout(timeoutId);
+        if (!data || !data.items) {
+          throw new Error('Invalid data format: expected object with "items" array');
+        }
         setAllItems(data.items || []);
         setIsLoading(false);
         setError(null);
       })
       .catch(err => {
+        if (isCancelled) return;
         console.error('Error loading inventory:', err);
-        setError(err.message || 'Failed to load inventory. Please refresh the page.');
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+          setError('Request was cancelled.');
+        } else {
+          setError(err.message || 'Failed to load inventory. Please check the browser console and refresh the page.');
+        }
         setIsLoading(false);
       });
+    
+    // Cleanup on unmount
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, []);
 
   // Get filter counts
@@ -79,21 +131,28 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Loading inventory...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading inventory...</p>
+          <p className="text-gray-400 text-sm mt-2">Please check the browser console (F12) if this takes too long</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 text-lg font-semibold mb-2">Error loading inventory</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center max-w-md mx-4">
+          <p className="text-red-600 text-xl font-semibold mb-2">Error loading inventory</p>
           <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-gray-500 text-sm mb-4">
+            Check the browser console (F12) for more details.
+          </p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-primary-blue text-white px-4 py-2 rounded hover:bg-primary-dark"
+            className="bg-primary-blue text-white px-6 py-2 rounded hover:bg-primary-dark"
           >
             Reload Page
           </button>

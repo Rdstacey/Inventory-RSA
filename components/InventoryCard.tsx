@@ -10,6 +10,7 @@ interface InventoryCardProps {
 
 export default function InventoryCard({ item, onCompareToggle, isComparing = false }: InventoryCardProps) {
   const firstImage = item.images && item.images.length > 0 ? item.images[0] : null;
+  // Ensure proper path construction - Next.js Image will handle basePath and URL encoding
   const imagePath = firstImage ? `/${firstImage}` : null;
 
   return (

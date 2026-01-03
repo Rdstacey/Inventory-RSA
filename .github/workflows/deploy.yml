@@ -31,6 +31,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Copy items folder to public (if not already there)
+        run: |
+          if [ ! -d "public/items" ]; then
+            cp -r items public/items || echo "Items folder copy skipped (may already exist)"
+          fi
+
       - name: Build
         run: npm run build
 

@@ -61,6 +61,10 @@ export default function InventoryCard({ item, onCompareToggle, isComparing = fal
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
             <Link
               href={`/inventory/${item.code}`}
+              onClick={() => {
+                // Save scroll position before navigating
+                sessionStorage.setItem('inventoryScrollPosition', window.scrollY.toString());
+              }}
               className="bg-primary-blue text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors"
             >
               View Listing

@@ -18,7 +18,7 @@ export default function Home() {
   const [filters, setFilters] = useState<FilterState>({});
   const [compareItems, setCompareItems] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 50;
+  const [itemsPerPage, setItemsPerPage] = useState(50);
 
   // Load data on mount
   useEffect(() => {
@@ -114,9 +114,36 @@ export default function Home() {
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     return filteredItems.slice(start, end);
-  }, [filteredItems, currentPage]);
+  }, [filteredItems, currentPage, itemsPerPage]);
 
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+  // Restore scroll position when returning from item page
+  useEffect(() => {
+    const savedPosition = sessionStorage.getItem('inventoryScrollPosition');
+    if (savedPosition && document.referrer.includes('/inventory/')) {
+      // Only restore if we came from an item page
+      setTimeout(() => {
+        window.scrollTo({ top: parseInt(savedPosition, 10), behavior: 'auto' });
+        sessionStorage.removeItem('inventoryScrollPosition');
+      }, 100);
+    }
+  }, []);
+
+  // Scroll to top when page changes (but not on initial load if we're restoring position)
+  useEffect(() => {
+    const savedPosition = sessionStorage.getItem('inventoryScrollPosition');
+    if (!savedPosition || !document.referrer.includes('/inventory/')) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentPage]);
+
+  // Handle items per page change - reset to page 1 and update
+  const handleItemsPerPageChange = (value: number) => {
+    setItemsPerPage(value);
+    setCurrentPage(1); // Reset to first page
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleCompareToggle = (code: string, checked: boolean) => {
     setCompareItems(prev => {
@@ -235,10 +262,14 @@ export default function Home() {
 
               <div className="flex items-center gap-2">
                 <label className="text-sm text-gray-700">Show:</label>
-                <select className="border border-gray-300 rounded px-3 py-1 text-sm">
-                  <option>50</option>
-                  <option>25</option>
-                  <option>100</option>
+                <select 
+                  value={itemsPerPage}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleItemsPerPageChange(Number(e.target.value))}
+                  className="border border-gray-300 rounded px-3 py-1 text-sm"
+                >
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
                 </select>
               </div>
 

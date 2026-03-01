@@ -3,8 +3,8 @@ import "./globals.css";
 import Header from "@/components/Header";
 
 export const metadata: Metadata = {
-  title: "RS Automation - Inventory Catalog",
-  description: "Browse our inventory of process equipment and automation systems",
+  title: "RS Automation - Used Food Process & Plant Automation Equipment",
+  description: "Quality used food processing, plant automation, and industrial equipment. Pumps, valves, mixers, PLCs, sensors, and more.",
 };
 
 export default function RootLayout({
@@ -21,4 +21,3 @@ export default function RootLayout({
     </html>
   );
 }
-

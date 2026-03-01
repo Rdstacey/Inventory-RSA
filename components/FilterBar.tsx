@@ -27,14 +27,14 @@ export default function FilterBar({
   };
 
   return (
-    <div className="bg-white p-4 border-b border-gray-200">
-      <div className="flex flex-wrap gap-4">
+    <div className="bg-white p-4 border-b border-steel-200">
+      <div className="flex flex-wrap gap-3">
         <div className="flex-1 min-w-[150px]">
-          <label className="block text-sm font-medium text-gray-700 mb-1">By Category</label>
+          <label className="block text-xs font-semibold text-steel-500 uppercase tracking-wide mb-1">Category</label>
           <select
             value={activeFilters.category || ''}
             onChange={(e) => updateFilter('category', e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            className="w-full border border-steel-300 rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-primary-light focus:border-primary-light"
           >
             <option value="">All Categories</option>
             {categories.map((cat) => (
@@ -46,11 +46,11 @@ export default function FilterBar({
         </div>
 
         <div className="flex-1 min-w-[150px]">
-          <label className="block text-sm font-medium text-gray-700 mb-1">By Manufacturer</label>
+          <label className="block text-xs font-semibold text-steel-500 uppercase tracking-wide mb-1">Manufacturer</label>
           <select
             value={activeFilters.manufacturer || ''}
             onChange={(e) => updateFilter('manufacturer', e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            className="w-full border border-steel-300 rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-primary-light focus:border-primary-light"
           >
             <option value="">All Manufacturers</option>
             {manufacturers.map((mfg) => (
@@ -62,11 +62,11 @@ export default function FilterBar({
         </div>
 
         <div className="flex-1 min-w-[150px]">
-          <label className="block text-sm font-medium text-gray-700 mb-1">By Region</label>
+          <label className="block text-xs font-semibold text-steel-500 uppercase tracking-wide mb-1">Region</label>
           <select
             value={activeFilters.region || ''}
             onChange={(e) => updateFilter('region', e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            className="w-full border border-steel-300 rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-primary-light focus:border-primary-light"
           >
             <option value="">All Regions</option>
             {regions.map((region) => (
@@ -78,11 +78,11 @@ export default function FilterBar({
         </div>
 
         <div className="flex-1 min-w-[150px]">
-          <label className="block text-sm font-medium text-gray-700 mb-1">By Country</label>
+          <label className="block text-xs font-semibold text-steel-500 uppercase tracking-wide mb-1">Country</label>
           <select
             value={activeFilters.country || ''}
             onChange={(e) => updateFilter('country', e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            className="w-full border border-steel-300 rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-primary-light focus:border-primary-light"
           >
             <option value="">All Countries</option>
             {countries.map((country) => (
@@ -96,4 +96,3 @@ export default function FilterBar({
     </div>
   );
 }
-

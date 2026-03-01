@@ -1,17 +1,13 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-// Data loading handled client-side for static export
 import { filterItems, getFilterCounts } from '@/lib/filters';
 import { FilterState, InventoryItem } from '@/types/inventory';
 import FilterSidebar from '@/components/FilterSidebar';
 import FilterBar from '@/components/FilterBar';
 import InventoryCard from '@/components/InventoryCard';
 
-// Data will be loaded client-side via fetch for static export
-
 export default function Home() {
-  // Load data on client side (for static export)
   const [allItems, setAllItems] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,78 +16,52 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
-  // Load data on mount
   useEffect(() => {
-    // Detect if we're on custom domain (no basePath) or GitHub Pages (with basePath)
     const isCustomDomain = window.location.hostname === 'inventory.rsautomation.net' || 
                           window.location.hostname === 'www.rsautomation.net';
     const pathname = window.location.pathname;
     const basePath = isCustomDomain ? '' : (pathname.startsWith('/Inventory-RSA') ? '/Inventory-RSA' : '');
     const dataPath = `${basePath}/data/inventory.json`;
-    console.log('Starting to fetch inventory data from', dataPath, '(detected basePath:', basePath, ', hostname:', window.location.hostname, ')');
     
     let isCancelled = false;
     
-    // Add timeout to prevent hanging
     const timeoutId = setTimeout(() => {
       if (!isCancelled) {
-        console.error('Fetch timeout - taking too long to load inventory');
-        setError('Request timed out. The inventory file may be too large or the server is slow. Please check the browser console for details.');
+        setError('Request timed out. Please refresh the page.');
         setIsLoading(false);
       }
-    }, 30000); // 30 second timeout
+    }, 30000);
 
     const controller = new AbortController();
     
     fetch(dataPath, {
       signal: controller.signal,
-      headers: {
-        'Accept': 'application/json',
-      },
+      headers: { 'Accept': 'application/json' },
     })
       .then(res => {
-        console.log('Fetch response received:', res.status, res.statusText, res.headers.get('content-type'));
-        if (!res.ok) {
-          throw new Error(`Failed to load inventory: ${res.status} ${res.statusText}. Please check that the file exists at /data/inventory.json`);
-        }
-        const contentType = res.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          console.warn('Unexpected content type:', contentType);
-        }
+        if (!res.ok) throw new Error(`Failed to load inventory: ${res.status}`);
         return res.text().then(text => {
-          console.log('Response text length:', text.length);
-          try {
-            return JSON.parse(text);
-          } catch (parseErr) {
-            console.error('JSON parse error:', parseErr);
-            throw new Error('Failed to parse inventory data. The file may be corrupted.');
-          }
+          try { return JSON.parse(text); }
+          catch { throw new Error('Failed to parse inventory data.'); }
         });
       })
       .then(data => {
         if (isCancelled) return;
-        console.log('Inventory data loaded successfully:', data.items?.length || 0, 'items');
         clearTimeout(timeoutId);
-        if (!data || !data.items) {
-          throw new Error('Invalid data format: expected object with "items" array');
-        }
+        if (!data?.items) throw new Error('Invalid data format');
         setAllItems(data.items || []);
         setIsLoading(false);
         setError(null);
       })
       .catch(err => {
         if (isCancelled) return;
-        console.error('Error loading inventory:', err);
         clearTimeout(timeoutId);
-        if (err.name === 'AbortError') {
-          setError('Request was cancelled.');
-        } else {
-          setError(err.message || 'Failed to load inventory. Please check the browser console and refresh the page.');
+        if (err.name !== 'AbortError') {
+          setError(err.message || 'Failed to load inventory.');
         }
         setIsLoading(false);
       });
     
-    // Cleanup on unmount
     return () => {
       isCancelled = true;
       clearTimeout(timeoutId);
@@ -99,30 +69,24 @@ export default function Home() {
     };
   }, []);
 
-  // Get filter counts
   const filterCounts = useMemo(() => {
     return getFilterCounts(allItems, filters);
   }, [allItems, filters]);
 
-  // Filter items
   const filteredItems = useMemo(() => {
     return filterItems(allItems, filters);
   }, [allItems, filters]);
 
-  // Paginate
   const paginatedItems = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    return filteredItems.slice(start, end);
+    return filteredItems.slice(start, start + itemsPerPage);
   }, [filteredItems, currentPage, itemsPerPage]);
 
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
 
-  // Restore scroll position when returning from item page
   useEffect(() => {
     const savedPosition = sessionStorage.getItem('inventoryScrollPosition');
     if (savedPosition && document.referrer.includes('/inventory/')) {
-      // Only restore if we came from an item page
       setTimeout(() => {
         window.scrollTo({ top: parseInt(savedPosition, 10), behavior: 'auto' });
         sessionStorage.removeItem('inventoryScrollPosition');
@@ -130,7 +94,6 @@ export default function Home() {
     }
   }, []);
 
-  // Scroll to top when page changes (but not on initial load if we're restoring position)
   useEffect(() => {
     const savedPosition = sessionStorage.getItem('inventoryScrollPosition');
     if (!savedPosition || !document.referrer.includes('/inventory/')) {
@@ -138,37 +101,32 @@ export default function Home() {
     }
   }, [currentPage]);
 
-  // Handle items per page change - reset to page 1 and update
   const handleItemsPerPageChange = (value: number) => {
     setItemsPerPage(value);
-    setCurrentPage(1); // Reset to first page
+    setCurrentPage(1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCompareToggle = (code: string, checked: boolean) => {
     setCompareItems(prev => {
       const newSet = new Set(prev);
-      if (checked) {
-        newSet.add(code);
-      } else {
-        newSet.delete(code);
-      }
+      if (checked) newSet.add(code);
+      else newSet.delete(code);
       return newSet;
     });
   };
 
-  const handleCompareSelected = () => {
-    // TODO: Implement compare functionality
-    alert(`Comparing ${compareItems.size} items`);
+  const handleClearFilters = () => {
+    setFilters({});
+    setCurrentPage(1);
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-steel-50">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading inventory...</p>
-          <p className="text-gray-400 text-sm mt-2">Please check the browser console (F12) if this takes too long</p>
+          <p className="text-steel-600 text-lg">Loading equipment inventory...</p>
         </div>
       </div>
     );
@@ -176,16 +134,13 @@ export default function Home() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-steel-50">
         <div className="text-center max-w-md mx-4">
           <p className="text-red-600 text-xl font-semibold mb-2">Error loading inventory</p>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <p className="text-gray-500 text-sm mb-4">
-            Check the browser console (F12) for more details.
-          </p>
+          <p className="text-steel-600 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-primary-blue text-white px-6 py-2 rounded hover:bg-primary-dark"
+            className="bg-primary-blue text-white px-6 py-2 rounded-md hover:bg-primary-dark"
           >
             Reload Page
           </button>
@@ -194,22 +149,45 @@ export default function Home() {
     );
   }
 
-  const categories = Object.keys(filterCounts.categories);
-  const manufacturers = Object.keys(filterCounts.manufacturers);
-  const regions = Object.keys(filterCounts.regions);
-  const countries = Object.keys(filterCounts.countries);
+  const categories = Object.keys(filterCounts.categories).sort();
+  const manufacturers = Object.keys(filterCounts.manufacturers).sort();
+  const regions = Object.keys(filterCounts.regions).sort();
+  const countries = Object.keys(filterCounts.countries).sort();
+  const hasActiveFilters = !!(filters.category || filters.manufacturer || filters.region || filters.country);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Showing {filteredItems.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredItems.length)} of {filteredItems.length} listings
-        </h1>
+    <div className="min-h-screen bg-steel-50">
+      {/* Hero banner */}
+      <div className="bg-gradient-to-r from-primary-dark to-primary-blue text-white py-6 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-xl md:text-2xl font-bold mb-1">Used Food Process &amp; Plant Automation Equipment</h2>
+          <p className="text-primary-light text-sm">
+            Quality pumps, valves, mixers, PLCs, sensors, and more &mdash; ready for your facility
+          </p>
+        </div>
+      </div>
+
+      {/* Results header */}
+      <div className="bg-white border-b border-steel-200 px-6 py-3">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <h1 className="text-lg font-bold text-steel-800">
+            {filteredItems.length > 0 
+              ? `Showing ${(currentPage - 1) * itemsPerPage + 1}\u2013${Math.min(currentPage * itemsPerPage, filteredItems.length)} of ${filteredItems.length} listings`
+              : 'No listings found'
+            }
+          </h1>
+          {hasActiveFilters && (
+            <button
+              onClick={handleClearFilters}
+              className="text-sm text-primary-blue hover:text-primary-dark font-medium"
+            >
+              Clear all filters
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row">
-        {/* Left Sidebar */}
         <aside className="w-full md:w-64 flex-shrink-0">
           <FilterSidebar
             categories={filterCounts.categories}
@@ -219,13 +197,11 @@ export default function Home() {
           />
         </aside>
 
-        {/* Main Content */}
         <main className="flex-1">
-          {/* Filter Bar */}
-          <div className="bg-primary-blue text-white p-3 flex justify-between items-center">
-            <h2 className="font-semibold">REFINE your search here by using filters</h2>
-            <span className="text-sm bg-white text-primary-blue px-3 py-1 rounded">
-              {filteredItems.length} Search Results
+          <div className="bg-primary-dark text-white p-3 flex justify-between items-center">
+            <h2 className="font-semibold text-sm uppercase tracking-wide">Refine Results</h2>
+            <span className="text-xs bg-accent-teal text-white px-3 py-1 rounded-full font-semibold">
+              {filteredItems.length} Results
             </span>
           </div>
 
@@ -239,19 +215,19 @@ export default function Home() {
           />
 
           {/* Controls */}
-          <div className="bg-white p-4 border-b border-gray-200 flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-white p-3 border-b border-steel-200 flex flex-wrap items-center justify-between gap-3">
             <button
-              onClick={handleCompareSelected}
+              onClick={() => alert(`Comparing ${compareItems.size} items`)}
               disabled={compareItems.size === 0}
-              className="bg-primary-blue text-white px-4 py-2 rounded hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed border-2 border-primary-blue"
+              className="bg-accent-green text-white px-4 py-2 rounded-md hover:bg-green-800 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium"
             >
-              Compare Selected ({compareItems.size})
+              Compare ({compareItems.size})
             </button>
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-700">Sort by:</label>
-                <select className="border border-gray-300 rounded px-3 py-1 text-sm">
+                <label className="text-xs font-semibold text-steel-500 uppercase">Sort:</label>
+                <select className="border border-steel-300 rounded-md px-2 py-1.5 text-sm">
                   <option>Featured</option>
                   <option>Price: Low to High</option>
                   <option>Price: High to Low</option>
@@ -261,11 +237,11 @@ export default function Home() {
               </div>
 
               <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-700">Show:</label>
+                <label className="text-xs font-semibold text-steel-500 uppercase">Show:</label>
                 <select 
                   value={itemsPerPage}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleItemsPerPageChange(Number(e.target.value))}
-                  className="border border-gray-300 rounded px-3 py-1 text-sm"
+                  className="border border-steel-300 rounded-md px-2 py-1.5 text-sm"
                 >
                   <option value={25}>25</option>
                   <option value={50}>50</option>
@@ -273,33 +249,20 @@ export default function Home() {
                 </select>
               </div>
 
-              <div className="text-sm text-gray-600">
-                &lt;&lt; Page {currentPage} of {totalPages || 1} &gt;&gt;
-              </div>
+              <span className="text-sm text-steel-500">
+                Page {currentPage} of {totalPages || 1}
+              </span>
             </div>
           </div>
 
-          {/* Instructions */}
-          <div className="bg-white p-4 border-b border-gray-200 text-sm text-gray-600">
-            Use top filters to narrow. Use left navigation to expand.
-          </div>
-
-          {/* Match by Parent Category */}
-          <div className="bg-white p-4 border-b border-gray-200">
-            <label className="text-sm text-gray-700">
-              <input type="checkbox" className="mr-2" />
-              Match by Parent Category ({filteredItems.length})
-            </label>
-          </div>
-
           {/* Inventory Listings */}
-          <div className="p-4 space-y-4">
+          <div className="p-4 space-y-3">
             {paginatedItems.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                <p>No items found matching your filters.</p>
+              <div className="text-center py-16 text-steel-500">
+                <p className="text-lg font-medium mb-2">No equipment found matching your filters.</p>
                 <button
-                  onClick={() => setFilters({})}
-                  className="mt-4 text-primary-blue hover:underline"
+                  onClick={handleClearFilters}
+                  className="text-primary-blue hover:underline font-medium"
                 >
                   Clear all filters
                 </button>
@@ -318,11 +281,11 @@ export default function Home() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="bg-white p-4 border-t border-gray-200 flex justify-center gap-2">
+            <div className="bg-white p-4 border-t border-steel-200 flex justify-center items-center gap-2">
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 border border-gray-300 rounded disabled:opacity-50"
+                className="px-4 py-2 border border-steel-300 rounded-md disabled:opacity-40 text-sm hover:bg-steel-50"
               >
                 Previous
               </button>
@@ -330,10 +293,10 @@ export default function Home() {
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`px-4 py-2 border rounded ${
+                  className={`px-3.5 py-2 border rounded-md text-sm font-medium ${
                     currentPage === page
                       ? 'bg-primary-blue text-white border-primary-blue'
-                      : 'border-gray-300'
+                      : 'border-steel-300 hover:bg-steel-50'
                   }`}
                 >
                   {page}
@@ -342,7 +305,7 @@ export default function Home() {
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 border border-gray-300 rounded disabled:opacity-50"
+                className="px-4 py-2 border border-steel-300 rounded-md disabled:opacity-40 text-sm hover:bg-steel-50"
               >
                 Next
               </button>

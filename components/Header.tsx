@@ -13,48 +13,45 @@ export default function Header() {
   ];
 
   return (
-    <header className="bg-gray-200 border-b-2 border-gray-400 shadow-md">
+    <header className="bg-primary-dark border-b-2 border-accent-teal shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center py-4">
-          {/* Logo and Branding */}
           <div className="flex items-center gap-4 flex-shrink-0 mb-4 md:mb-0">
             <Link href="https://rsautomation.net" className="flex items-center gap-4">
-              {/* Logo - RS Automation logo with globe */}
-              <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0">
+              <div className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0">
                 <Image
                   src="/LOGO.png"
                   alt="RS Automation Logo"
                   fill
                   className="object-contain"
-                  sizes="(max-width: 768px) 96px, 128px"
+                  sizes="(max-width: 768px) 80px, 96px"
                   priority
                 />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
                   RS Automation
                 </h1>
-                <p className="text-xs md:text-sm text-gray-700 italic mt-1">
-                  Engineering innovative solutions for today's manufacturing needs
+                <p className="text-xs md:text-sm text-accent-light mt-0.5">
+                  Used Food Process &amp; Plant Automation Equipment
                 </p>
               </div>
             </Link>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex flex-wrap justify-center gap-2 md:gap-4">
+          <nav className="flex flex-wrap justify-center gap-1 md:gap-2">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className="px-3 py-2 text-sm md:text-base font-medium text-gray-700 hover:text-primary-blue hover:underline transition-colors"
+                className="px-3 py-2 text-sm font-medium text-steel-300 hover:text-white hover:bg-primary-blue rounded transition-colors"
               >
                 {link.label}
               </a>
             ))}
             <Link
               href="/"
-              className="px-3 py-2 text-sm md:text-base font-medium text-primary-blue border-b-2 border-primary-blue"
+              className="px-3 py-2 text-sm font-medium text-white bg-accent-teal/20 border border-accent-teal rounded"
             >
               Inventory
             </Link>
@@ -64,4 +61,3 @@ export default function Header() {
     </header>
   );
 }
-

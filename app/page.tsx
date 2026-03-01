@@ -157,16 +157,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-steel-50">
-      {/* Hero banner */}
-      <div className="bg-gradient-to-r from-primary-dark to-primary-blue text-white py-6 px-6">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-xl md:text-2xl font-bold mb-1">Used Food Process &amp; Plant Automation Equipment</h2>
-          <p className="text-primary-light text-sm">
-            Quality pumps, valves, mixers, PLCs, sensors, and more &mdash; ready for your facility
-          </p>
-        </div>
-      </div>
-
       {/* Results header */}
       <div className="bg-white border-b border-steel-200 px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

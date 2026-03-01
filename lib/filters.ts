@@ -1,9 +1,13 @@
 import { InventoryItem, FilterState } from '@/types/inventory';
+import { getSimpleCategory } from '@/lib/categoryMapping';
 
 export function filterItems(items: InventoryItem[], filters: FilterState): InventoryItem[] {
   return items.filter(item => {
-    if (filters.category && item.category !== filters.category) {
-      return false;
+    if (filters.category) {
+      const itemSimpleCat = getSimpleCategory(item.category);
+      if (itemSimpleCat !== filters.category) {
+        return false;
+      }
     }
     if (filters.manufacturer && item.manufacturer !== filters.manufacturer) {
       return false;
@@ -25,49 +29,39 @@ export function getFilterCounts(items: InventoryItem[], activeFilters: FilterSta
   const countries: Record<string, number> = {};
 
   items.forEach(item => {
-    // Count categories
+    const simpleCat = getSimpleCategory(item.category);
+
+    const matchesOtherFilters = (excludeKey: keyof FilterState) => {
+      const testFilters = { ...activeFilters, [excludeKey]: undefined };
+      return filterItems([item], testFilters).length > 0;
+    };
+
     if (!activeFilters.manufacturer && !activeFilters.region && !activeFilters.country) {
-      categories[item.category] = (categories[item.category] || 0) + 1;
-    } else {
-      const matches = filterItems([item], activeFilters);
-      if (matches.length > 0) {
-        categories[item.category] = (categories[item.category] || 0) + 1;
-      }
+      categories[simpleCat] = (categories[simpleCat] || 0) + 1;
+    } else if (matchesOtherFilters('category')) {
+      categories[simpleCat] = (categories[simpleCat] || 0) + 1;
     }
 
-    // Count manufacturers
     if (!activeFilters.category && !activeFilters.region && !activeFilters.country) {
       manufacturers[item.manufacturer] = (manufacturers[item.manufacturer] || 0) + 1;
-    } else {
-      const matches = filterItems([item], activeFilters);
-      if (matches.length > 0) {
-        manufacturers[item.manufacturer] = (manufacturers[item.manufacturer] || 0) + 1;
-      }
+    } else if (matchesOtherFilters('manufacturer')) {
+      manufacturers[item.manufacturer] = (manufacturers[item.manufacturer] || 0) + 1;
     }
 
-    // Count regions
     if (item.locationParsed.region) {
       if (!activeFilters.category && !activeFilters.manufacturer && !activeFilters.country) {
         regions[item.locationParsed.region] = (regions[item.locationParsed.region] || 0) + 1;
-      } else {
-        const matches = filterItems([item], activeFilters);
-        if (matches.length > 0) {
-          regions[item.locationParsed.region] = (regions[item.locationParsed.region] || 0) + 1;
-        }
+      } else if (matchesOtherFilters('region')) {
+        regions[item.locationParsed.region] = (regions[item.locationParsed.region] || 0) + 1;
       }
     }
 
-    // Count countries
     if (!activeFilters.category && !activeFilters.manufacturer && !activeFilters.region) {
       countries[item.locationParsed.country] = (countries[item.locationParsed.country] || 0) + 1;
-    } else {
-      const matches = filterItems([item], activeFilters);
-      if (matches.length > 0) {
-        countries[item.locationParsed.country] = (countries[item.locationParsed.country] || 0) + 1;
-      }
+    } else if (matchesOtherFilters('country')) {
+      countries[item.locationParsed.country] = (countries[item.locationParsed.country] || 0) + 1;
     }
   });
 
   return { categories, manufacturers, regions, countries };
 }
-

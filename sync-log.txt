@@ -19,3 +19,18 @@ error: failed to push some refs to 'https://github.com/Rdstacey/Inventory-RSA.gi
 [2026-04-13 16:30:59] Copied inventory.db.
 [2026-04-13 16:30:59] Exporting data/inventory.json from SQLite...
 [2026-04-13 16:30:59] Updated public/data/inventory.json.
+[2026-04-13 16:31:09] ERROR: Command failed: git push origin main
+To https://github.com/Rdstacey/Inventory-RSA.git
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'https://github.com/Rdstacey/Inventory-RSA.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. This is usually caused by another repository pushing to
+hint: the same ref. If you want to integrate the remote changes, use
+hint: 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+[2026-04-13 16:40:23] Starting sync...
+[2026-04-13 16:43:17] Copied items folder (photos compressed under each photos/).
+[2026-04-13 16:43:17] Copied inventory.db.
+[2026-04-13 16:43:17] Exporting data/inventory.json from SQLite...
+[2026-04-13 16:43:17] Updated public/data/inventory.json.

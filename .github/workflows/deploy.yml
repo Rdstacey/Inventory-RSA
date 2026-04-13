@@ -31,11 +31,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Copy items folder to public (if not already there)
+      # Always replace public/items so stale or partial public/items in git
+      # cannot skip the copy (that caused broken image URLs on Pages).
+      - name: Sync items folder into public for image URLs
         run: |
-          if [ ! -d "public/items" ]; then
-            cp -r items public/items || echo "Items folder copy skipped (may already exist)"
+          if [ ! -d "items" ]; then
+            echo "::error::items/ is missing from the repository checkout. Add and push the items folder."
+            exit 1
           fi
+          rm -rf public/items
+          mkdir -p public
+          cp -r items public/items
 
       - name: Build
         run: npm run build

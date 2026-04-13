@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { inventoryImageSrc } from '@/lib/imageUrl';
 
 interface ImageGalleryProps {
   images: string[];
@@ -18,6 +19,8 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
   const basePath = isCustomDomain ? '' : (pathname.startsWith('/Inventory-RSA') ? '/Inventory-RSA' : '');
 
+  const srcFor = (relative: string) => inventoryImageSrc(basePath, relative);
+
   if (!images || images.length === 0) {
     return (
       <div className="w-full h-64 bg-steel-100 flex items-center justify-center rounded-lg">
@@ -31,7 +34,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
       <div className="space-y-3">
         <div className="relative w-full h-96 bg-steel-50 rounded-lg overflow-hidden border border-steel-200">
           <Image
-            src={`${basePath}/${images[selectedImage]}`}
+            src={srcFor(images[selectedImage])}
             alt={`${title} - Image ${selectedImage + 1}`}
             fill
             className="object-contain cursor-pointer hover:scale-105 transition-transform duration-300"
@@ -51,7 +54,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
                 }`}
               >
                 <Image
-                  src={`${basePath}/${image}`}
+                  src={srcFor(image)}
                   alt={`${title} - Thumbnail ${index + 1}`}
                   fill
                   className="object-cover"
@@ -77,7 +80,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
             </button>
             <div className="relative w-full h-full">
               <Image
-                src={`${basePath}/${images[selectedImage]}`}
+                src={srcFor(images[selectedImage])}
                 alt={`${title} - Full size`}
                 width={1200}
                 height={800}

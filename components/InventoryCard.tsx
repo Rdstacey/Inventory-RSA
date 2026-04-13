@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { InventoryItem } from '@/types/inventory';
 import { getSimpleCategory } from '@/lib/categoryMapping';
+import { inventoryImageSrc } from '@/lib/imageUrl';
 
 interface InventoryCardProps {
   item: InventoryItem;
@@ -16,7 +17,7 @@ export default function InventoryCard({ item, onCompareToggle, isComparing = fal
      window.location.hostname === 'www.rsautomation.net');
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
   const basePath = isCustomDomain ? '' : (pathname.startsWith('/Inventory-RSA') ? '/Inventory-RSA' : '');
-  const imagePath = firstImage ? `${basePath}/${firstImage}` : null;
+  const imagePath = firstImage ? inventoryImageSrc(basePath, firstImage) : null;
   const simpleCategory = getSimpleCategory(item.category);
 
   return (

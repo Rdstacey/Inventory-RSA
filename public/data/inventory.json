@@ -6618,6 +6618,29 @@
       "description": "",
       "images": [],
       "imageFolder": ""
+    },
+    {
+      "code": "INV-000221",
+      "title": "Test",
+      "category": "Uncategorized",
+      "categoryId": null,
+      "manufacturer": "Uncategorized",
+      "brand": null,
+      "modelNumber": null,
+      "serialNumber": null,
+      "location": "",
+      "locationParsed": {
+        "country": "USA"
+      },
+      "price": null,
+      "currency": "USD",
+      "condition": "unknown",
+      "quantity": 1,
+      "description": "",
+      "images": [
+        "items/INV-000221 - Test/photos/image.jpg"
+      ],
+      "imageFolder": "INV-000221 - Test"
     }
   ],
   "categories": [

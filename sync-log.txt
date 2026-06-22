@@ -238,3 +238,9 @@ hint: See the 'Note about fast-forwards' in 'git push --help' for details.
 [2026-06-21 08:03:24] Copied inventory.db.
 [2026-06-21 08:03:24] Exporting data/inventory.json from SQLite...
 [2026-06-21 08:03:25] Updated public/data/inventory.json.
+[2026-06-21 08:03:42] Sync complete.
+[2026-06-22 08:00:04] Starting sync...
+[2026-06-22 08:03:20] Copied items folder (photos compressed under each photos/).
+[2026-06-22 08:03:20] Copied inventory.db.
+[2026-06-22 08:03:21] Exporting data/inventory.json from SQLite...
+[2026-06-22 08:03:21] Updated public/data/inventory.json.
